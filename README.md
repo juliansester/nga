@@ -5,7 +5,7 @@
 # Abstract
 
 We study pricing and hedging under parameter uncertainty for a class of Markov
-processes which we call generalized ane processes and which includes the Black-
+processes which we call generalized affine processes and which includes the Black-
 Scholes model as well as the constant elasticity of variance (CEV) model as special
 cases. Based on a general dynamic programming principle, we are able to link the
 associated nonlinear expectation to a variational form of the Kolmogorov equation
