@@ -20,7 +20,7 @@ outperforms existing hedging approaches, in particular in highly volatile period
 
 The Examples from the paper are provided as seperate jupyter notebooks, each with a unique name, exactly specifying which example is covered therein.
 
-The file Functions.py contains the Pyhton-code that is employed to train the hedging strategies.
+The file Functions.py contains the Python-code that is employed to train the hedging strategies.
 
 ## Data
 Note that the data for the S&P 500 examples cannot be provided for legal reasons.
