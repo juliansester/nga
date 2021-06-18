@@ -1,4 +1,4 @@
-# Code for Robust deep hedging
+# Code for "Robust deep hedging"
 
 ## Eva Lutkebohmert, Thorsten Schmidt, Julian Sester
 
