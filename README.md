@@ -22,9 +22,13 @@ Can be found [here](https://arxiv.org/abs/2106.10024)
 
 # Content
 
-The Examples from the paper are provided as seperate jupyter notebooks, each with a unique name, exactly specifying which example is covered therein.
+The Examples from the paper are provided as seperate jupyter notebooks, each with a unique name, exactly specifying which example is covered therein. These are:
+- An [Example](https://github.com/juliansester/nga/blob/main/Example%20Butterfly.ipynb) covering butterfly options.
+- An [Example](https://github.com/juliansester/nga/blob/main/Example%20Call%20Option.ipynb) covering call options.
+- An [Example](https://github.com/juliansester/nga/blob/main/Example%20Path-dependent%20option.ipynb) covering path-dependent options.
+- An [Example](https://github.com/juliansester/nga/blob/main/Example%20SP500-Asian.ipynb) covering Asian options using data of the SP 500.
 
-The file Functions.py contains the Python-code that is employed to train the hedging strategies.
+The file [Functions.py](https://github.com/juliansester/nga/blob/main/Functions.py) contains the Python-code that is employed to train the hedging strategies.
 
 ## Data
 Note that the data for the S&P 500 examples cannot be provided for legal reasons.
