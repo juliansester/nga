@@ -15,6 +15,10 @@ efficiently solves the hedging problem under parameter uncertainty. We numerical
 evaluate this method on simulated and real data and show that the robust deep hedging
 outperforms existing hedging approaches, in particular in highly volatile periods.
 
+# Preprint
+
+Can be found [here](https://arxiv.org/abs/2106.10024)
+
 
 # Content
 
