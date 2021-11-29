@@ -29,7 +29,7 @@ The Examples from the paper are provided as seperate jupyter notebooks, each wit
 - An [Example](https://github.com/juliansester/nga/blob/main/Example%20SP500-Asian.ipynb) covering Asian options using data of the SP 500.
 - An [Example](https://github.com/juliansester/nga/blob/main/Example%20SP500-Asian_BlackScholesHedge.ipynb) covering Asian options using data of the SP 500 using a Black Scholes model for hedging.
 - An [Example](https://github.com/juliansester/nga/blob/main/Example%20SP500-Asian_SeveralWindows.ipynb) covering Asian options using data of the SP 500 over several windows.
-- An [Example](hhttps://github.com/juliansester/nga/blob/main/Example-PriceBounds.ipynb) comparing prices of the robust deep hedging approach with prices of the finite differences approach.
+- An [Example](https://github.com/juliansester/nga/blob/main/Example-PriceBounds.ipynb) comparing prices of the robust deep hedging approach with prices of the finite differences approach.
 
 The file [Functions.py](https://github.com/juliansester/nga/blob/main/Functions.py) contains the Python-code that is employed to train the hedging strategies.
 The file [Functions_NonRobust.py](https://github.com/juliansester/nga/blob/main/Functions_NonRobust.py) contains the Python-code that is employed to train the non-robust hedging strategies.
