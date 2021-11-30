@@ -9,6 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from scipy.stats import norm
+from tqdm import tqdm
 
 def generate_path(a_0, # Interval for Parameter a_0
                   a_1, # Interval for  Parameter a_1
@@ -60,6 +61,7 @@ def generate_batch_of_paths(a_0, # Interval for Parameter a_0
         yield batch/scaling_factor
         
 
+
 def optimal_hedge(derivative, # Function describing the payoff of the derivative to hedge
                   a_0, # Interval for Parameter a_0
                   a_1, # Interval for Parameter a_1
@@ -75,19 +77,27 @@ def optimal_hedge(derivative, # Function describing the payoff of the derivative
                   l_r = 0.0001, # Learning rate of the Adam optimizer,
                   BATCH_SIZE =256, # Batch size for sampling the paths,
                   hedge = "hedge",
-                  scaling_factor =1
+                  scaling_factor =1.,
+                  path_dependent = False
                  ): 
+    #x_0 = tf.cast(x_0,tf.float32)
     #List of Trading Days
     first_path = next(generate_batch_of_paths(a_0,a_1,b_0,b_1,gamma,x_0,T,n,BATCH_SIZE,scaling_factor))
-    Initial_value = tf.reduce_mean(tf.map_fn(derivative,first_path)) 
+    Initial_value = tf.reduce_mean(tf.map_fn(derivative,first_path))  
     t_k = np.linspace(0,T,n+1)
     alpha = tf.Variable([Initial_value],trainable=True,dtype = "float32")
     
     # Define the neural networks
-    def build_model(depth,nr_neurons):        
-        x = keras.Input(shape=(1,),name = "x")
-        t = keras.Input(shape=(1,),name = "t")
-        fully_connected_Input = layers.concatenate([x, t])            
+    def build_model(depth,nr_neurons):
+        if path_dependent:
+            x = keras.Input(shape=(1,),name = "x")
+            t = keras.Input(shape=(1,),name = "t")
+            max_x = keras.Input(shape=(1,),name = "max_x")
+            fully_connected_Input = layers.concatenate([x, t,max_x]) 
+        else:            
+            x = keras.Input(shape=(1,),name = "x")
+            t = keras.Input(shape=(1,),name = "t")
+            fully_connected_Input = layers.concatenate([x, t])         
         # Create the NN       
         values_all = layers.Dense(nr_neurons,activation = "relu")(fully_connected_Input)       
         # Create deep layers
@@ -95,8 +105,12 @@ def optimal_hedge(derivative, # Function describing the payoff of the derivative
             values_all = layers.Dense(nr_neurons,activation = "relu")(values_all)            
         # Output Layers
         value_out = layers.Dense(1)(values_all)
-        model = keras.Model(inputs=[x,t],
-                outputs = [value_out])
+        if path_dependent:
+            model = keras.Model(inputs=[x,t,max_x],
+                    outputs = [value_out])
+        else:
+            model = keras.Model(inputs=[x,t],
+                    outputs = [value_out])
         return model
     
     # Define Risk Measure    
@@ -108,10 +122,10 @@ def optimal_hedge(derivative, # Function describing the payoff of the derivative
             return tf.reduce_mean(tf.math.square(x))
     if hedge == "super-hedge":
         def rho(x):
-            return tf.reduce_mean(tf.math.square(x))+tf.reduce_mean(tf.nn.relu(-x))
+            return tf.reduce_mean(tf.math.square(x))+tf.reduce_mean(tf.math.square(tf.nn.relu(-x)))
     if hedge == "sub-hedge":
         def rho(x):
-            return tf.reduce_mean(tf.math.square(x))+tf.reduce_mean(tf.nn.relu(x))
+            return tf.reduce_mean(tf.math.square(x))+tf.reduce_mean(tf.math.square(tf.nn.relu(x)))
         
     # Define the Loss function    
     def loss(model,batch):        
@@ -119,7 +133,13 @@ def optimal_hedge(derivative, # Function describing the payoff of the derivative
         #delta_S = tf.reduce_sum([model_evaluated[i]*np.reshape(np.diff(batch)[:,i],(BATCH_SIZE,1)) for i in range(n)],0)
         #derivative_on_batch = np.array([[derivative(batch[i,:])] for i in range(BATCH_SIZE)])       
         patch_diff = batch[:,1:]-batch[:,:-1]
-        hedge_evaluated = [model([tf.reshape(batch[:,i],(BATCH_SIZE,1)),tf.reshape(np.repeat(t_k[i],BATCH_SIZE),(BATCH_SIZE,1))]) for i in range(n)]
+        if path_dependent:
+            hedge_evaluated = [model([tf.reshape(batch[:,i],(BATCH_SIZE,1)),
+                                      tf.reshape(np.repeat(t_k[i],BATCH_SIZE),(BATCH_SIZE,1)),
+                                      tf.reshape(tf.reduce_max(batch[:,:(i+1)],1),(BATCH_SIZE,1))]) for i in range(n)]
+        else:
+            hedge_evaluated = [model([tf.reshape(batch[:,i],(BATCH_SIZE,1)),
+                                      tf.reshape(np.repeat(t_k[i],BATCH_SIZE),(BATCH_SIZE,1))]) for i in range(n)]
         delta_S = tf.reduce_sum(tf.math.multiply(patch_diff,tf.transpose(tf.reshape(hedge_evaluated,(n,BATCH_SIZE)))),1)
         derivative_on_batch = tf.map_fn(derivative,batch)
         loss = rho(alpha+delta_S-derivative_on_batch)
@@ -143,7 +163,7 @@ def optimal_hedge(derivative, # Function describing the payoff of the derivative
     losses = []
 
     # Training Loop
-    for epoch in range(int(EPOCHS)):
+    for epoch in tqdm(range(int(EPOCHS))):
         batch = next(generate_batch_of_paths(a_0,a_1,b_0,b_1,gamma,x_0,T,n,BATCH_SIZE,scaling_factor))
         loss_value, grads = grad(model,batch)
         #grads_a =  grad_alpha(model,batch)
